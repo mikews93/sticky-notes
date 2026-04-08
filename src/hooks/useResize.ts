@@ -25,6 +25,7 @@ export function useResize({ initialSize, onResizeEnd }: UseResizeOptions): UseRe
     initialHeight: 0,
   })
   const isResizingRef = useRef(false)
+  const currentSizeRef = useRef(currentSize)
   const onResizeEndRef = useRef(onResizeEnd)
 
   useEffect(() => {
@@ -35,6 +36,7 @@ export function useResize({ initialSize, onResizeEnd }: UseResizeOptions): UseRe
   useEffect(() => {
     if (!isResizingRef.current) {
       setCurrentSize(initialSize)
+      currentSizeRef.current = initialSize
     }
   }, [initialSize])
 
@@ -45,10 +47,12 @@ export function useResize({ initialSize, onResizeEnd }: UseResizeOptions): UseRe
       const deltaX = e.clientX - resizeState.current.startX
       const deltaY = e.clientY - resizeState.current.startY
 
-      setCurrentSize({
+      const newSize = {
         width: Math.max(MIN_NOTE_WIDTH, resizeState.current.initialWidth + deltaX),
         height: Math.max(MIN_NOTE_HEIGHT, resizeState.current.initialHeight + deltaY),
-      })
+      }
+      currentSizeRef.current = newSize
+      setCurrentSize(newSize)
     }
 
     const handleMouseUp = () => {
@@ -81,14 +85,14 @@ export function useResize({ initialSize, onResizeEnd }: UseResizeOptions): UseRe
       resizeState.current = {
         startX: e.clientX,
         startY: e.clientY,
-        initialWidth: currentSize.width,
-        initialHeight: currentSize.height,
+        initialWidth: currentSizeRef.current.width,
+        initialHeight: currentSizeRef.current.height,
       }
 
       isResizingRef.current = true
       setIsResizing(true)
     },
-    [currentSize],
+    [],
   )
 
   return { handleMouseDown, isResizing, currentSize }

@@ -25,6 +25,7 @@ export function useDrag({ initialPosition, onDragEnd, onDragStart }: UseDragOpti
     initialY: 0,
   })
   const isDraggingRef = useRef(false)
+  const currentPositionRef = useRef(currentPosition)
   const onDragEndRef = useRef(onDragEnd)
   const onDragStartRef = useRef(onDragStart)
 
@@ -41,6 +42,7 @@ export function useDrag({ initialPosition, onDragEnd, onDragStart }: UseDragOpti
   useEffect(() => {
     if (!isDraggingRef.current) {
       setCurrentPosition(initialPosition)
+      currentPositionRef.current = initialPosition
     }
   }, [initialPosition])
 
@@ -51,10 +53,12 @@ export function useDrag({ initialPosition, onDragEnd, onDragStart }: UseDragOpti
       const deltaX = e.clientX - dragState.current.startX
       const deltaY = e.clientY - dragState.current.startY
 
-      setCurrentPosition({
+      const newPos = {
         x: dragState.current.initialX + deltaX,
         y: dragState.current.initialY + deltaY,
-      })
+      }
+      currentPositionRef.current = newPos
+      setCurrentPosition(newPos)
     }
 
     const handleMouseUp = () => {
@@ -89,8 +93,8 @@ export function useDrag({ initialPosition, onDragEnd, onDragStart }: UseDragOpti
       dragState.current = {
         startX: e.clientX,
         startY: e.clientY,
-        initialX: currentPosition.x,
-        initialY: currentPosition.y,
+        initialX: currentPositionRef.current.x,
+        initialY: currentPositionRef.current.y,
       }
 
       isDraggingRef.current = true
@@ -99,7 +103,7 @@ export function useDrag({ initialPosition, onDragEnd, onDragStart }: UseDragOpti
       // Defer onDragStart to avoid updating parent state during child render
       queueMicrotask(() => onDragStartRef.current?.())
     },
-    [currentPosition],
+    [],
   )
 
   return { handleMouseDown, isDragging, currentPosition }

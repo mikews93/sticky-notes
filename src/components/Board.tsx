@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import type { RefObject } from 'react'
 import type { Note as NoteType, NotePosition, NoteSize } from '@/types'
 import { Note } from './Note'
@@ -13,7 +14,7 @@ interface BoardProps {
   onDragStateChange: (noteId: string, isDragging: boolean) => void
 }
 
-export function Board({
+export const Board = memo(function Board({
   notes,
   trashRef,
   onMove,
@@ -26,11 +27,9 @@ export function Board({
   return (
     <div
       data-testid="board"
-      className="relative w-full bg-[#fafafa]"
+      className="relative w-full h-full"
       style={{
-        height: `calc(100vh - var(--toolbar-height))`,
-        marginTop: 'var(--toolbar-height)',
-        backgroundImage: 'radial-gradient(circle, #ddd 1px, transparent 1px)',
+        backgroundImage: 'radial-gradient(circle, var(--dot-color) 1px, transparent 1px)',
         backgroundSize: '24px 24px',
       }}
     >
@@ -49,4 +48,4 @@ export function Board({
       ))}
     </div>
   )
-}
+})

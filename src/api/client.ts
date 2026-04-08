@@ -7,7 +7,9 @@ export async function apiRequest<T>(
   endpoint: string,
   options?: RequestInit,
 ): Promise<ApiResponse<T>> {
-  await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY))
+  if (import.meta.env.DEV) {
+    await new Promise((resolve) => setTimeout(resolve, SIMULATED_DELAY))
+  }
 
   try {
     const res = await fetch(`${API_BASE}${endpoint}`, {

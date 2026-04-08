@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import type { NoteColour } from '@/types'
 import { DEFAULT_NOTE_WIDTH, DEFAULT_NOTE_HEIGHT } from '@/constants'
 import { useNotes } from '@/hooks/useNotes'
@@ -15,6 +15,22 @@ export default function App() {
   const [selectedColour, setSelectedColour] = useState<NoteColour>('yellow')
   const [draggingNoteId, setDraggingNoteId] = useState<string | null>(null)
   const trashRef = useRef<HTMLDivElement>(null)
+
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    return localStorage.getItem('theme') === 'dark'
+  })
+
+  // Theme Sync
+  useEffect(() => {
+    const body = document.body
+    if (isDarkMode) {
+      body.classList.add('dark')
+      localStorage.setItem('theme', 'dark')
+    } else {
+      body.classList.remove('dark')
+      localStorage.setItem('theme', 'light')
+    }
+  }, [isDarkMode])
 
   /** Hooks */
   const {
@@ -44,9 +60,11 @@ export default function App() {
 
   /** Rendering */
   return (
-    <div className="w-full h-screen overflow-hidden">
+    <div className="w-full h-screen overflow-hidden bg-gray-50 dark:bg-[#0a0a0c] text-gray-900 dark:text-gray-100 transition-colors duration-300 relative">
       <Toolbar
         selectedColour={selectedColour}
+        isDarkMode={isDarkMode}
+        onToggleDarkMode={() => setIsDarkMode((d) => !d)}
         onColourChange={setSelectedColour}
         onAddNote={handleAddNote}
       />

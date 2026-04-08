@@ -93,6 +93,7 @@ export function useNotes() {
   const storageTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const apiTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const isInitialMount = useRef(true)
+  const dirtyNoteIds = useRef<Set<string>>(new Set())
 
   // Hydrate from API on mount
   useEffect(() => {
@@ -122,18 +123,21 @@ export function useNotes() {
     return () => clearTimeout(storageTimer.current)
   }, [notes])
 
-  // Sync to API (debounced, fire-and-forget)
+  // Sync to API (debounced, fire-and-forget — only dirty notes)
   useEffect(() => {
     if (isInitialMount.current) return
 
     clearTimeout(apiTimer.current)
     apiTimer.current = setTimeout(() => {
-      // Full sync: replace all notes on the server
-      // In a real app, you'd track individual changes
-      notes.forEach((note) => {
-        notesApi.update(note).catch(() => {
-          // Fire-and-forget: localStorage is the fallback
-        })
+      const dirty = dirtyNoteIds.current
+      if (dirty.size === 0) return
+
+      const syncAll = dirty.has('__all__')
+      const dirtyNotes = syncAll ? notes : notes.filter((n) => dirty.has(n.id))
+      dirty.clear()
+
+      dirtyNotes.forEach((note) => {
+        notesApi.update(note).catch(() => {})
       })
     }, API_DEBOUNCE)
 
@@ -143,29 +147,36 @@ export function useNotes() {
   const addNote = useCallback(
     (position: NotePosition, size: NoteSize, colour: NoteColour) => {
       dispatch({ type: 'ADD_NOTE', payload: { position, size, colour } })
+      // ID is generated inside reducer; mark all as dirty so the new note syncs
+      dirtyNoteIds.current.add('__all__')
     },
     [],
   )
 
   const removeNote = useCallback((id: string) => {
     dispatch({ type: 'REMOVE_NOTE', payload: { id } })
+    dirtyNoteIds.current.delete(id)
     notesApi.remove(id).catch(() => {})
   }, [])
 
   const moveNote = useCallback((id: string, position: NotePosition) => {
     dispatch({ type: 'MOVE_NOTE', payload: { id, position } })
+    dirtyNoteIds.current.add(id)
   }, [])
 
   const resizeNote = useCallback((id: string, size: NoteSize) => {
     dispatch({ type: 'RESIZE_NOTE', payload: { id, size } })
+    dirtyNoteIds.current.add(id)
   }, [])
 
   const updateText = useCallback((id: string, text: string) => {
     dispatch({ type: 'UPDATE_TEXT', payload: { id, text } })
+    dirtyNoteIds.current.add(id)
   }, [])
 
   const bringToFront = useCallback((id: string) => {
     dispatch({ type: 'BRING_TO_FRONT', payload: { id } })
+    dirtyNoteIds.current.add(id)
   }, [])
 
   return { notes, addNote, removeNote, moveNote, resizeNote, updateText, bringToFront }

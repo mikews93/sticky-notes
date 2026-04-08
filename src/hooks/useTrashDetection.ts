@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useRef, useLayoutEffect } from 'react'
 import type { RefObject } from 'react'
 import { rectsOverlap } from '@/utils/geometry'
 
@@ -13,18 +13,33 @@ export function useTrashDetection({
   noteRect,
   isDragging,
 }: UseTrashDetectionOptions): { isOverTrash: boolean } {
-  const isOverTrash = useMemo(() => {
-    if (!isDragging || !noteRect || !trashRef.current) return false
+  const isOverTrashRef = useRef(false)
+  // Cache the trash zone rect at drag start — it doesn't move during drag
+  const trashRectRef = useRef<DOMRect | null>(null)
 
-    const trashRect = trashRef.current.getBoundingClientRect()
+  useLayoutEffect(() => {
+    if (!isDragging || !noteRect) {
+      isOverTrashRef.current = false
+      trashRectRef.current = null
+      return
+    }
 
-    return rectsOverlap(noteRect, {
-      x: trashRect.x,
-      y: trashRect.y,
-      width: trashRect.width,
-      height: trashRect.height,
+    // Cache trash rect on first frame of drag
+    if (!trashRectRef.current && trashRef.current) {
+      trashRectRef.current = trashRef.current.getBoundingClientRect()
+    }
+
+    if (!trashRectRef.current) return
+
+    const over = rectsOverlap(noteRect, {
+      x: trashRectRef.current.x,
+      y: trashRectRef.current.y,
+      width: trashRectRef.current.width,
+      height: trashRectRef.current.height,
     })
+
+    isOverTrashRef.current = over
   }, [isDragging, noteRect, trashRef])
 
-  return { isOverTrash }
+  return { isOverTrash: isOverTrashRef.current }
 }

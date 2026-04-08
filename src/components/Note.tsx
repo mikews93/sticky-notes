@@ -1,4 +1,4 @@
-import { useRef, useCallback } from 'react'
+import { memo, useRef, useCallback } from 'react'
 import type { RefObject } from 'react'
 import type { Note as NoteType, NoteColour, NotePosition, NoteSize } from '@/types'
 import { cn } from '@/lib/utils'
@@ -7,12 +7,12 @@ import { useResize } from '@/hooks/useResize'
 import { useTrashDetection } from '@/hooks/useTrashDetection'
 import { ResizeHandle } from './ResizeHandle'
 
-const COLOUR_CLASSES: Record<NoteColour, { bg: string; header: string }> = {
-  yellow: { bg: 'bg-[var(--note-yellow)]', header: 'bg-[var(--note-yellow-dark)]' },
-  pink: { bg: 'bg-[var(--note-pink)]', header: 'bg-[var(--note-pink-dark)]' },
-  blue: { bg: 'bg-[var(--note-blue)]', header: 'bg-[var(--note-blue-dark)]' },
-  green: { bg: 'bg-[var(--note-green)]', header: 'bg-[var(--note-green-dark)]' },
-  orange: { bg: 'bg-[var(--note-orange)]', header: 'bg-[var(--note-orange-dark)]' },
+const COLOUR_CLASSES: Record<NoteColour, { bg: string; header: string; borderDark: string }> = {
+  yellow: { bg: 'bg-[var(--note-yellow)]', header: 'bg-[var(--note-yellow-dark)]', borderDark: 'dark:border-[var(--note-yellow-dark)]' },
+  pink: { bg: 'bg-[var(--note-pink)]', header: 'bg-[var(--note-pink-dark)]', borderDark: 'dark:border-[var(--note-pink-dark)]' },
+  blue: { bg: 'bg-[var(--note-blue)]', header: 'bg-[var(--note-blue-dark)]', borderDark: 'dark:border-[var(--note-blue-dark)]' },
+  green: { bg: 'bg-[var(--note-green)]', header: 'bg-[var(--note-green-dark)]', borderDark: 'dark:border-[var(--note-green-dark)]' },
+  orange: { bg: 'bg-[var(--note-orange)]', header: 'bg-[var(--note-orange-dark)]', borderDark: 'dark:border-[var(--note-orange-dark)]' },
 }
 
 interface NoteProps {
@@ -26,7 +26,7 @@ interface NoteProps {
   onDragStateChange: (noteId: string, isDragging: boolean) => void
 }
 
-export function Note({
+export const Note = memo(function Note({
   note,
   trashRef,
   onMove,
@@ -117,13 +117,15 @@ export function Note({
       data-testid={`note-${note.id}`}
       onMouseDown={handleNoteMouseDown}
       className={cn(
-        'absolute rounded-lg overflow-hidden flex flex-col',
-        'transition-[shadow,transform,opacity,border-color] duration-150',
+        'absolute rounded-xl overflow-hidden flex flex-col group',
+        'animate-pop-in border border-white/20 dark:shadow-[0_0_15px_rgba(0,0,0,0.5)] backdrop-blur-xs',
+        'transition-[transform,opacity,box-shadow,border-color] duration-300 ease-[cubic-bezier(0.175,0.885,0.32,1.275)]',
         colours.bg,
-        isDragging && 'scale-[1.02]',
-        isDragging && !isOverTrash && 'shadow-(--shadow-note-dragging)',
-        isDragging && isOverTrash && 'shadow-(--shadow-note-dragging) border-2 border-red-500 opacity-80',
-        !isDragging && !isResizing && 'shadow-(--shadow-note)',
+        colours.borderDark,
+        isDragging && 'scale-[1.05] rotate-2 duration-150!',
+        isDragging && !isOverTrash && 'shadow-(--shadow-note-dragging) z-9999',
+        isDragging && isOverTrash && 'shadow-(--shadow-note-dragging) border-2 border-red-500/50 opacity-60 scale-[0.9]',
+        !isDragging && !isResizing && 'shadow-(--shadow-note) hover:shadow-(--shadow-note-hover) hover:-translate-y-1',
         isResizing && 'shadow-(--shadow-note-dragging)',
       )}
       style={{
@@ -147,11 +149,11 @@ export function Note({
         )}
       >
         <div className="flex gap-1 opacity-40">
-          <div className="w-1 h-1 rounded-full bg-gray-600" />
-          <div className="w-1 h-1 rounded-full bg-gray-600" />
-          <div className="w-1 h-1 rounded-full bg-gray-600" />
-          <div className="w-1 h-1 rounded-full bg-gray-600" />
-          <div className="w-1 h-1 rounded-full bg-gray-600" />
+          <div className="w-1 h-1 rounded-full bg-gray-600/40 dark:bg-gray-900/40" />
+          <div className="w-1 h-1 rounded-full bg-gray-600/40 dark:bg-gray-900/40" />
+          <div className="w-1 h-1 rounded-full bg-gray-600/40 dark:bg-gray-900/40" />
+          <div className="w-1 h-1 rounded-full bg-gray-600/40 dark:bg-gray-900/40" />
+          <div className="w-1 h-1 rounded-full bg-gray-600/40 dark:bg-gray-900/40" />
         </div>
       </div>
 
@@ -163,9 +165,9 @@ export function Note({
         onChange={handleTextChange}
         placeholder="Type your note..."
         className={cn(
-          'flex-1 w-full p-3 text-sm text-gray-800 leading-relaxed',
+          'flex-1 w-full px-5 py-4 text-sm text-gray-800 dark:text-gray-100 leading-relaxed',
           'bg-transparent border-none outline-none resize-none',
-          'placeholder:text-gray-500',
+          'placeholder:text-gray-500/80 dark:placeholder:text-gray-400/80',
           isDragging && 'pointer-events-none',
         )}
       />
@@ -174,4 +176,4 @@ export function Note({
       <ResizeHandle onMouseDown={handleResizeMouseDown} />
     </div>
   )
-}
+})

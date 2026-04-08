@@ -1,37 +1,109 @@
 @import 'tailwindcss';
 
+/* Enable class-based dark mode instead of prefers-color-scheme */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --note-yellow: #fff9c4;
-  --note-pink: #f8bbd0;
-  --note-blue: #bbdefb;
-  --note-green: #c8e6c9;
-  --note-orange: #ffe0b2;
+  /* Pastel, Awwwards-inspired sticky note colors */
+  --note-yellow: #fde047;
+  --note-pink: #f9a8d4;
+  --note-blue: #93c5fd;
+  --note-green: #86efac;
+  --note-orange: #fdba74;
 
-  --note-yellow-dark: #f9f09f;
-  --note-pink-dark: #f48fb1;
-  --note-blue-dark: #90caf9;
-  --note-green-dark: #a5d6a7;
-  --note-orange-dark: #ffcc80;
+  --note-yellow-dark: #facc15;
+  --note-pink-dark: #f472b6;
+  --note-blue-dark: #60a5fa;
+  --note-green-dark: #4ade80;
+  --note-orange-dark: #f97316;
 
-  --shadow-note: 0 2px 8px rgba(0, 0, 0, 0.15);
-  --shadow-note-dragging: 0 8px 24px rgba(0, 0, 0, 0.25);
+  /* Deep, multi-layered realistic shadows */
+  --shadow-note: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 
+                 0 2px 4px -1px rgba(0, 0, 0, 0.03),
+                 0 10px 20px -5px rgba(0, 0, 0, 0.04);
+  
+  --shadow-note-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 
+                       0 4px 6px -2px rgba(0, 0, 0, 0.02),
+                       0 20px 25px -5px rgba(0, 0, 0, 0.04);
+                       
+  --shadow-note-dragging: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 
+                          0 0 0 1px rgba(0,0,0,0.05),
+                          0 15px 25px -5px rgba(0,0,0,0.1);
 
   --toolbar-height: 56px;
   --trash-height: 72px;
+
+  /* Dot grid color for the canvas background */
+  --dot-color: #ddd;
+
+  /* Custom bouncy bezier curve for springs */
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+/* Tailwind v4 Preflight handles box-sizing and margin resets */
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Lato', system-ui, -apple-system, sans-serif;
   overflow: hidden;
-  background: #fafafa;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.dark {
+  /* DARK MODE neon glowing colors for sticky notes */
+  --note-yellow: rgba(253, 224, 71, 0.1);
+  --note-pink: rgba(249, 168, 212, 0.1);
+  --note-blue: rgba(147, 197, 253, 0.1);
+  --note-green: rgba(134, 239, 172, 0.1);
+  --note-orange: rgba(253, 186, 116, 0.1);
+
+  /* Vivid Neon borders for glassmorphism */
+  --note-yellow-dark: #fde047;
+  --note-pink-dark: #f9a8d4;
+  --note-blue-dark: #93c5fd;
+  --note-green-dark: #4ade80;
+  --note-orange-dark: #fb923c;
+
+  /* Subtle dot grid on dark background */
+  --dot-color: rgba(255, 255, 255, 0.06);
+}
+
+/* Custom Keyframes for Wow effect */
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(10px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.05) translateY(-2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 25px 10px rgba(239, 68, 68, 0.25);
+  }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+  75% { transform: rotate(-1deg); }
+}
+
+.animate-pop-in {
+  animation: popIn 0.5s var(--ease-spring) forwards;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 1.5s infinite ease-in-out;
 }
