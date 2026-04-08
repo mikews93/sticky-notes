@@ -104,6 +104,8 @@ types -> utils -> hooks -> components -> App
 - **Dual persistence** -- localStorage for instant hydration, REST API for server sync with dirty-tracking (only changed notes are synced)
 - **Spec-driven development** -- requirements, design, and task specs in `docs/` were written before implementation
 
+For a detailed architecture overview, see [ARCHITECTURE.md](ARCHITECTURE.md).
+
 ### Data Flow
 
 ```
