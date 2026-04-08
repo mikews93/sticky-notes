@@ -1,0 +1,37 @@
+@import 'tailwindcss';
+
+:root {
+  --note-yellow: #fff9c4;
+  --note-pink: #f8bbd0;
+  --note-blue: #bbdefb;
+  --note-green: #c8e6c9;
+  --note-orange: #ffe0b2;
+
+  --note-yellow-dark: #f9f09f;
+  --note-pink-dark: #f48fb1;
+  --note-blue-dark: #90caf9;
+  --note-green-dark: #a5d6a7;
+  --note-orange-dark: #ffcc80;
+
+  --shadow-note: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --shadow-note-dragging: 0 8px 24px rgba(0, 0, 0, 0.25);
+
+  --toolbar-height: 56px;
+  --trash-height: 72px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  overflow: hidden;
+  background: #fafafa;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
