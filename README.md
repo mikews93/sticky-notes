@@ -1,5 +1,7 @@
 # Stick 'Em Up - Sticky Notes SPA
 
+> **Live Demo:** [https://mikews93.github.io/sticky-notes/](https://mikews93.github.io/sticky-notes/)
+
 A single-page sticky notes application built with React 19, TypeScript, and Tailwind CSS v4. Features custom drag-and-drop interactions, real-time trash detection, dark mode, and dual-layer persistence -- all without any external UI or drag-and-drop libraries.
 
 ## Features
