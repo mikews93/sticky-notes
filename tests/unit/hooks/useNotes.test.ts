@@ -30,6 +30,7 @@ describe('notesReducer', () => {
       const result = notesReducer([], {
         type: 'ADD_NOTE',
         payload: {
+          id: 'test-note-1',
           position: { x: 100, y: 100 },
           size: { width: 200, height: 180 },
           colour: 'pink',
@@ -37,7 +38,7 @@ describe('notesReducer', () => {
       })
 
       expect(result).toHaveLength(1)
-      expect(result[0].id).toBe('mock-id-123')
+      expect(result[0].id).toBe('test-note-1')
       expect(result[0].colour).toBe('pink')
       expect(result[0].text).toBe('')
       expect(result[0].zIndex).toBe(1)
@@ -47,6 +48,7 @@ describe('notesReducer', () => {
       const result = notesReducer([baseNote, secondNote], {
         type: 'ADD_NOTE',
         payload: {
+          id: 'test-note-2',
           position: { x: 0, y: 0 },
           size: { width: 200, height: 180 },
           colour: 'blue',

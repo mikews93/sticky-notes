@@ -78,15 +78,16 @@ export const Note = memo(function Note({
   }, [note.id, onBringToFront])
 
   /** Hooks */
+  const { handleMouseDown: handleResizeMouseDown, isResizing, currentSize } = useResize({
+    initialSize: note.size,
+    onResizeEnd: handleResizeEnd,
+  })
+
   const { handleMouseDown: handleDragMouseDown, isDragging, currentPosition } = useDrag({
     initialPosition: note.position,
     onDragEnd: handleDragEnd,
     onDragStart: handleDragStart,
-  })
-
-  const { handleMouseDown: handleResizeMouseDown, isResizing, currentSize } = useResize({
-    initialSize: note.size,
-    onResizeEnd: handleResizeEnd,
+    bounds: { noteSize: currentSize },
   })
 
   const noteRect = isDragging

@@ -1,10 +1,15 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
-import type { NotePosition } from '@/types'
+import type { NotePosition, NoteSize } from '@/types'
+import { clampPosition } from '@/utils/geometry'
 
 interface UseDragOptions {
   initialPosition: NotePosition
   onDragEnd: (position: NotePosition) => void
   onDragStart?: () => void
+  bounds?: {
+    noteSize: NoteSize
+    boardSize?: { width: number; height: number }
+  }
 }
 
 interface UseDragReturn {
@@ -13,30 +18,23 @@ interface UseDragReturn {
   currentPosition: NotePosition
 }
 
-export function useDrag({ initialPosition, onDragEnd, onDragStart }: UseDragOptions): UseDragReturn {
+export function useDrag({ initialPosition, onDragEnd, onDragStart, bounds }: UseDragOptions): UseDragReturn {
   const [isDragging, setIsDragging] = useState(false)
   const [currentPosition, setCurrentPosition] = useState<NotePosition>(initialPosition)
 
-  // Mutable refs to avoid stale closures in document listeners
-  const dragState = useRef({
-    startX: 0,
-    startY: 0,
-    initialX: 0,
-    initialY: 0,
-  })
   const isDraggingRef = useRef(false)
-  const currentPositionRef = useRef(currentPosition)
+  const currentPositionRef = useRef(initialPosition)
   const onDragEndRef = useRef(onDragEnd)
   const onDragStartRef = useRef(onDragStart)
+  const boundsRef = useRef(bounds)
+  const dragState = useRef({ startX: 0, startY: 0, initialX: 0, initialY: 0 })
 
-  // Keep refs in sync
+  // Keep refs up to date
   useEffect(() => {
     onDragEndRef.current = onDragEnd
-  }, [onDragEnd])
-
-  useEffect(() => {
     onDragStartRef.current = onDragStart
-  }, [onDragStart])
+    boundsRef.current = bounds
+  }, [onDragEnd, onDragStart, bounds])
 
   // Sync position from parent when not dragging
   useEffect(() => {
@@ -53,10 +51,20 @@ export function useDrag({ initialPosition, onDragEnd, onDragStart }: UseDragOpti
       const deltaX = e.clientX - dragState.current.startX
       const deltaY = e.clientY - dragState.current.startY
 
-      const newPos = {
+      let newPos = {
         x: dragState.current.initialX + deltaX,
         y: dragState.current.initialY + deltaY,
       }
+
+      const activeBounds = boundsRef.current
+      if (activeBounds) {
+        newPos = clampPosition(
+          newPos,
+          activeBounds.noteSize,
+          activeBounds.boardSize || { width: window.innerWidth, height: window.innerHeight }
+        )
+      }
+
       currentPositionRef.current = newPos
       setCurrentPosition(newPos)
     }
@@ -67,12 +75,8 @@ export function useDrag({ initialPosition, onDragEnd, onDragStart }: UseDragOpti
       isDraggingRef.current = false
       setIsDragging(false)
 
-      // Read the latest position from the ref-tracked state
-      // and call onDragEnd after the state update
-      setCurrentPosition((pos) => {
-        onDragEndRef.current(pos)
-        return pos
-      })
+      // Use the ref to get the latest position and trigger the cleanup
+      onDragEndRef.current(currentPositionRef.current)
     }
 
     document.addEventListener('mousemove', handleMouseMove)

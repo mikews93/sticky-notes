@@ -24,8 +24,9 @@ export function useTrashDetection({
       return
     }
 
-    // Cache trash rect on first frame of drag
-    if (!trashRectRef.current && trashRef.current) {
+    // Read trash rect each frame — it transitions into view after drag starts,
+    // so a cached value from the first frame would be the off-screen position
+    if (trashRef.current) {
       trashRectRef.current = trashRef.current.getBoundingClientRect()
     }
 

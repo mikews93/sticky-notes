@@ -2,7 +2,12 @@ import { test, expect } from '@playwright/test'
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/')
-  await page.evaluate(() => localStorage.clear())
+  await page.evaluate(async () => {
+    localStorage.clear()
+    const res = await fetch('http://localhost:3001/notes')
+    const notes = await res.json()
+    await Promise.all(notes.map((n: { id: string }) => fetch(`http://localhost:3001/notes/${n.id}`, { method: 'DELETE' })))
+  })
   await page.reload()
 })
 

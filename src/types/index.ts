@@ -22,7 +22,7 @@ export interface Note {
 }
 
 export type NotesAction =
-  | { type: 'ADD_NOTE'; payload: { position: NotePosition; size: NoteSize; colour: NoteColour } }
+  | { type: 'ADD_NOTE'; payload: { id: string; position: NotePosition; size: NoteSize; colour: NoteColour } }
   | { type: 'REMOVE_NOTE'; payload: { id: string } }
   | { type: 'MOVE_NOTE'; payload: { id: string; position: NotePosition } }
   | { type: 'RESIZE_NOTE'; payload: { id: string; size: NoteSize } }

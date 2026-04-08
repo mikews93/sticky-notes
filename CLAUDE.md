@@ -39,6 +39,9 @@ types → utils → hooks → components → App
 - Types and constants are the foundation — everything imports from them
 - Hooks own all interaction logic — components only render and delegate
 - `useNotes` is the single source of truth (useReducer + persistence)
+- localStorage is the primary persistence layer; API is a secondary sync target
+- New notes are POSTed directly; updates are debounced PUTs via dirty tracking
+- `serverIdMap` ref bridges client UUIDs to server-assigned IDs (no re-renders)
 - During drag/resize, position/size lives in local component state (performance)
 - Parent reducer is only dispatched on drag/resize **end**
 - Document-level mouse listeners for reliable cursor tracking

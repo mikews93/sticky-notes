@@ -1,9 +1,18 @@
 import { test, expect } from '@playwright/test'
 
+async function clearAll(page: import('@playwright/test').Page) {
+  await page.evaluate(async () => {
+    localStorage.clear()
+    const res = await fetch('http://localhost:3001/notes')
+    const notes = await res.json()
+    await Promise.all(notes.map((n: { id: string }) => fetch(`http://localhost:3001/notes/${n.id}`, { method: 'DELETE' })))
+  })
+}
+
 test.describe('Persistence', () => {
   test('restores notes from localStorage after page reload', async ({ page }) => {
     await page.goto('/')
-    await page.evaluate(() => localStorage.clear())
+    await clearAll(page)
     await page.reload()
 
     // Create a note and add text
@@ -33,7 +42,7 @@ test.describe('Persistence', () => {
 
   test('starts with empty board when localStorage is empty', async ({ page }) => {
     await page.goto('/')
-    await page.evaluate(() => localStorage.clear())
+    await clearAll(page)
     await page.reload()
 
     const notes = page.locator('[data-testid^="note-"]')
@@ -42,7 +51,7 @@ test.describe('Persistence', () => {
 
   test('persists note position after drag', async ({ page }) => {
     await page.goto('/')
-    await page.evaluate(() => localStorage.clear())
+    await clearAll(page)
     await page.reload()
 
     await page.click('[data-testid="add-note-button"]')

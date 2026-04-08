@@ -1,9 +1,13 @@
 import { test, expect } from '@playwright/test'
 
 test.beforeEach(async ({ page }) => {
-  // Clear localStorage before each test
   await page.goto('/')
-  await page.evaluate(() => localStorage.clear())
+  await page.evaluate(async () => {
+    localStorage.clear()
+    const res = await fetch('http://localhost:3001/notes')
+    const notes = await res.json()
+    await Promise.all(notes.map((n: { id: string }) => fetch(`http://localhost:3001/notes/${n.id}`, { method: 'DELETE' })))
+  })
   await page.reload()
 })
 
@@ -44,20 +48,19 @@ test.describe('Notes CRUD', () => {
     const noteBox = await note.boundingBox()
     expect(noteBox).not.toBeNull()
 
-    // Get trash zone position
-    const trash = page.locator('[data-testid="trash-zone"]')
-    const trashBox = await trash.boundingBox()
-    expect(trashBox).not.toBeNull()
-
-    // Drag note header to trash zone
+    // Trash zone is hidden off-screen until drag starts, so drag to
+    // the bottom of the viewport where it will appear
+    const viewport = page.viewportSize()!
     const startX = noteBox!.x + noteBox!.width / 2
     const startY = noteBox!.y + 16 // Middle of header (32px / 2)
-    const endX = trashBox!.x + trashBox!.width / 2
-    const endY = trashBox!.y + trashBox!.height / 2
+    const endX = viewport.width / 2
+    const endY = viewport.height - 20
 
     await page.mouse.move(startX, startY)
     await page.mouse.down()
     await page.mouse.move(endX, endY, { steps: 15 })
+    // Wait for trash zone transition to complete before releasing
+    await page.waitForTimeout(400)
     await page.mouse.up()
 
     // Note should be removed
